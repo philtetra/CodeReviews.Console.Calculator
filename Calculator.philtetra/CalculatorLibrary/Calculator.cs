@@ -24,9 +24,20 @@ public partial class Calculator
 	{
 		T operation = new() { Num1 = num1, Num2 = num2 };
 		//SaveOperation(operation); // TO FIX: currently throwing an exception
+		this.Calculations.Add(operation);
 		IncrementUseCount();
 
 		return operation.Result;
+	}
+
+	public T GetOperation<T>(double num1, double num2) where T : Operation, new()
+	{
+		T operation = new() { Num1 = num1, Num2 = num2 };
+		//SaveOperation(operation); // TO FIX: currently throwing an exception
+		this.Calculations.Add(operation);
+		IncrementUseCount();
+
+		return operation;
 	}
 
 	private void SaveOperation(Operation op)
