@@ -126,4 +126,69 @@ public partial class Calculator
 			Console.WriteLine($"{ex.Message}\nInner - {ex.InnerException}: {ex.InnerException?.Message}");
 		}
 	}
+
+	private void LoadCalculations()
+	{
+		string file = calculationsFile;
+		//string Num1Name = "Num1";
+		//string Num2Name = "Num2";
+		//string ResultName = "Result";
+		string CalculationsName = "Calculations";
+
+		if (!File.Exists(file))
+		{
+			Console.WriteLine($"'{file}' file is not present.");
+			return;
+		}
+
+		try
+		{
+			JObject json = JObject.Parse(File.ReadAllText(file));
+
+			if (json.ContainsKey(CalculationsName))
+			{
+				List<Operation>? calculations = JsonConvert.DeserializeObject<List<Operation>>(json.ToString());
+				if (calculations is not null)
+				{
+					this.Calculations = calculations;
+				}
+			}
+			else
+			{
+				Console.WriteLine($"'{file}' does not contain '{CalculationsName}'.");
+			}
+		}
+		catch (JsonReaderException ex)
+		{
+			Console.WriteLine($"Parsing file '{file}' failed:\n{ex.Message}");
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"{ex.Message}\nInner - {ex.InnerException}: {ex.InnerException?.Message}");
+		}
+	}
+
+	private void SaveCalculations()
+	{
+		string file = calculationsFile;
+		string Num1Name = "Num1";
+		string Num2Name = "Num2";
+		string ResultName = "Result";
+		string CalculationsName = "Calculations";
+		
+		try
+		{
+			string json = JsonConvert.SerializeObject(this.Calculations, Formatting.Indented);
+			File.WriteAllText(file, json);
+		}
+		catch (JsonReaderException ex)
+		{
+			Console.WriteLine($"Parsing file '{file}' failed:\n{ex.Message}");
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"{ex.Message}\nInner - {ex.InnerException}: {ex.InnerException?.Message}");
+		}
+
+	}
 }
