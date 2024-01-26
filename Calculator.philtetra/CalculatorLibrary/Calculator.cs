@@ -8,11 +8,12 @@ public partial class Calculator
 	public int UseCount { get; private set; }
 	private readonly JsonWriter writer;
 	private const string userInfoFile = "user_info.json";
+	private const string calculationsFile = "calculations_log.json";
 	public List<Operation> Calculations { get; set; }
 	public Calculator()
 	{
 		Calculations = new List<Operation>();
-		StreamWriter logFile = File.CreateText("calculator.log");
+		StreamWriter logFile = File.CreateText("calculations_log.json");
 		Trace.AutoFlush = true;
 		writer = new JsonTextWriter(logFile);
 		writer.Formatting = Formatting.Indented;
@@ -23,7 +24,7 @@ public partial class Calculator
 	public double DoOperation<T>(double num1, double num2) where T : Operation, new()
 	{
 		T operation = new() { Num1 = num1, Num2 = num2 };
-		//SaveOperation(operation); // TO FIX: currently throwing an exception
+		SaveOperation(operation); // TO FIX: currently throwing an exception
 		this.Calculations.Add(operation);
 		IncrementUseCount();
 
@@ -48,6 +49,7 @@ public partial class Calculator
 		writer.WritePropertyName("Operand2");
 		writer.WriteValue(op.Num2);
 		writer.WritePropertyName("Operation");
+		writer.WriteValue(op.GetType());
 		writer.WritePropertyName("Result");
 		writer.WriteValue(op.Result);
 		writer.WriteEndObject();

@@ -7,7 +7,7 @@ class Program
 		//OperationHelper.Num2Color = ConsoleColor.Magenta;
 
 		var menu = new CalculatorMenu();
-		menu.Calculator.GenerateSampleCalculations(100);
+		menu.GenerateSampleCalculations(100);
 		bool endApp = false;
 		while (!endApp)
 		{

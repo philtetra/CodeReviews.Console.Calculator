@@ -52,29 +52,29 @@ public class Modulus : Operation
 public class Power : Operation
 {
 	protected override double Solve() => Pow(Num1, Num2);
-	public override string ToString() => $"{Num1}^{Num2} = {Result:0.####}";
+	public override string ToString() => $"{Num1} ^ {Num2} = {Result:0.####}";
 }
 
 public class SquareRoot : Operation
 {
 	protected override double Solve() => Sqrt(Num1);
-	public override string ToString() => $"{Num1}^(1/{Num2}) = {Result:0.####}";
+	public override string ToString() => $"{Num1} ^ (1/2) = {Result:0.####}";
 }
 
 public class Sinus : Operation
 {
 	protected override double Solve() => Sin(Num1);
-	public override string ToString() => $"sin({Num1}) = {Result:0.####}";
+	public override string ToString() => $"sin( {Num1} ) = {Result:0.####}";
 }
 
 public class Cosinus : Operation
 {
 	protected override double Solve() => Cos(Num1);
-	public override string ToString() => $"cos({Num1}) = {Result:0.####}";
+	public override string ToString() => $"cos( {Num1} ) = {Result:0.####}";
 }
 
 public class Tangent : Operation
 {
 	protected override double Solve() => Tan(Num1);
-	public override string ToString() => $"tan({Num1}) = {Result:0.####}";
+	public override string ToString() => $"tan( {Num1} ) = {Result:0.####}";
 }
