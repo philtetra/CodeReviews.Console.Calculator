@@ -105,13 +105,13 @@ public static class OperationHelper
 					Console.ForegroundColor = ConsoleColor.Gray;
 					Console.Write($" {TypeToOperatorStringMap[operationToPerform.GetType()]} ");
 					Console.ForegroundColor = Num2Color;
-					Console.Write(ctxOperation.Result);
+					Console.Write($"{ctxOperation.Result:0.####}");
 					PrintEqualsSign();
 				}
 				else
 				{
 					Console.ForegroundColor = Num1Color;
-					Console.Write(ctxOperation.Result);
+					Console.Write($"{ctxOperation.Result:0.####}");
 					Console.ForegroundColor = ConsoleColor.Gray;
 					Console.Write($" {TypeToOperatorStringMap[operationToPerform.GetType()]} ");
 					Console.ForegroundColor = Num2Color;
@@ -127,13 +127,13 @@ public static class OperationHelper
 					Console.ForegroundColor = ConsoleColor.Gray;
 					Console.Write($"{TypeToOperatorStringMap[operationToPerform.GetType()]}");
 					Console.ForegroundColor = Num2Color;
-					Console.Write(ctxOperation.Result);
+					Console.Write($"{ctxOperation.Result:0.####}");
 					PrintEqualsSign();
 				}
 				else
 				{
 					Console.ForegroundColor = Num1Color;
-					Console.Write(ctxOperation.Result);
+					Console.Write($"{ctxOperation.Result:0.####}");
 					Console.ForegroundColor = ConsoleColor.Gray;
 					Console.Write($"{TypeToOperatorStringMap[operationToPerform.GetType()]}");
 					Console.ForegroundColor = Num2Color;
@@ -143,7 +143,7 @@ public static class OperationHelper
 				break;
 			case OperatorType.SquareRoot:
 				Console.ForegroundColor = Num1Color; // As Sqrt always uses Num1 for the calculation
-				Console.Write(ctxOperation.Result);
+				Console.Write($"{ctxOperation.Result:0.####}");
 				Console.ForegroundColor = ConsoleColor.Gray;
 				Console.Write($"{TypeToOperatorStringMap[operationToPerform.GetType()]}");
 				PrintEqualsSign();
@@ -153,7 +153,7 @@ public static class OperationHelper
 				Console.Write($"{TypeToOperatorStringMap[operationToPerform.GetType()]}");
 				Console.Write("(");
 				Console.ForegroundColor = Num1Color; // As Trig functions always use Num1 for the calculation
-				Console.Write(ctxOperation.Result);
+				Console.Write($"{ctxOperation.Result:0.####}");
 				Console.ForegroundColor = ConsoleColor.Gray;
 				Console.Write(")");
 				PrintEqualsSign();
@@ -294,13 +294,13 @@ public static class OperationHelper
 	private static void PrintNum1(this Operation operation)
 	{
 		Console.ForegroundColor = Num1Color;
-		Console.Write(operation.Num1);
+		Console.Write($"{operation.Num1:0.####}");
 	}
 
 	private static void PrintNum2(this Operation operation)
 	{
 		Console.ForegroundColor = Num2Color;
-		Console.Write(operation.Num2);
+		Console.Write($"{operation.Num2:0.####}");
 	}
 
 	private static void PrintResult(this Operation operation)
@@ -328,6 +328,7 @@ public static class OperationHelper
 		[8] = typeof(Cosinus),
 		[9] = typeof(Tangent)
 	};
+
 
 	public static readonly Dictionary<Type, OperatorType> TypeToOperatorTypeMap = new()
 	{

@@ -321,7 +321,7 @@ public class CalculatorMenu
 		{
 			Console.Write("\nUsing result ");
 			Console.ForegroundColor = OperationHelper.GetPromptColor(historyCtx.UseNum1);
-			Console.Write(historyCtx.Operation!.Result);
+			Console.Write($"{historyCtx.Operation!.Result:0.####}");
 			Console.ForegroundColor = ConsoleColor.Gray;
 			Console.WriteLine($" as {(historyCtx.UseNum1 ? "the first number" : "the second number")}");
 			Console.WriteLine("( For Sqrt & Trig functions it is always used as the first number )");
@@ -392,15 +392,15 @@ public class CalculatorMenu
 			}
 			else
 			{
-
+				ClearLine();
 				if (historyCtx.UseNum1)
 				{
 					num1 = historyCtx.Operation!.Result;
-					num2 = GetUserInput("Type second number: ");
+					num2 = GetUserInput("Type second number: ", stayOnLine: true);
 				}
 				else
 				{
-					num1 = GetUserInput("Type first number: ");
+					num1 = GetUserInput("Type first number: ", stayOnLine: true);
 					num2 = historyCtx.Operation!.Result;
 				}
 			}
@@ -426,11 +426,6 @@ public class CalculatorMenu
 		Console.CursorVisible = true;
 
 		return false;
-	}
-
-	public void ConstructInputs(ref double num1, ref double num2)
-	{
-
 	}
 
 	public static void ClearLine()
@@ -470,12 +465,18 @@ public class CalculatorMenu
 	public void LoadData()
 	{
 		this.Calculator.LoadUserInfo();
+		Console.WriteLine("User info loading finished");
+		this.Calculator.LoadCalculations();
+		Console.WriteLine("Calculations loading finished");
+		Console.WriteLine("Press any key to continue...");
+		Console.ReadKey();
 	}
 
 	public void SaveData()
 	{
-		this.Calculator.Finish();
+		// this.Calculator.Finish();
 		this.Calculator.SaveUserInfo();
+		this.Calculator.SaveCalculations();
 	}
 
 	public enum MenuOption
