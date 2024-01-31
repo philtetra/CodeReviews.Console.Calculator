@@ -25,7 +25,7 @@ public class CalculatorMenu
 			[7] = Calculator.DoOperation<Sinus>,
 			[8] = Calculator.DoOperation<Cosinus>,
 			[9] = Calculator.DoOperation<Tangent>
-		}; 
+		};
 		this.IntToGetOperationMap = new()
 		{
 			[0] = Calculator.GetOperation<Addition>,
@@ -40,8 +40,9 @@ public class CalculatorMenu
 			[9] = Calculator.GetOperation<Tangent>
 		};
 		this.historyCtx = new();
-		LoadData();
 	}
+
+	private void SaveData() => this.Calculator.SaveCalculations();
 
 	public bool ViewMainMenu()
 	{
@@ -52,6 +53,7 @@ public class CalculatorMenu
 		switch (keyInfo.Key)
 		{
 			case ConsoleKey.D0:
+				SaveData();
 				return true;
 			case ConsoleKey.D1:
 				this.View = ViewOperations;
@@ -406,7 +408,7 @@ public class CalculatorMenu
 			}
 		}
 
-		Operation operation;
+		Operation? operation = null;
 		try
 		{
 			//double result = this.IntToDoOperationMap[parsedChoice - 1](num1, num2);
@@ -420,7 +422,9 @@ public class CalculatorMenu
 		{
 			Console.WriteLine($"An error occured:\n{ex.Message}");
 		}
-		Console.WriteLine('\n' + new string('-', columnWidth) + '\n');
+
+		int lineLength = operation is null ? columnWidth : operation.ToString().Length;
+		Console.WriteLine('\n' + new string('-', lineLength) + '\n');
 		Console.CursorVisible = false;
 		Console.ReadKey(true);
 		Console.CursorVisible = true;
@@ -460,23 +464,6 @@ public class CalculatorMenu
 		}
 		if (stayOnLine) Console.CursorTop--;
 		return cleanNum;
-	}
-
-	public void LoadData()
-	{
-		this.Calculator.LoadUserInfo();
-		Console.WriteLine("User info loading finished");
-		this.Calculator.LoadCalculations();
-		Console.WriteLine("Calculations loading finished");
-		Console.WriteLine("Press any key to continue...");
-		Console.ReadKey();
-	}
-
-	public void SaveData()
-	{
-		// this.Calculator.Finish();
-		this.Calculator.SaveUserInfo();
-		this.Calculator.SaveCalculations();
 	}
 
 	public enum MenuOption

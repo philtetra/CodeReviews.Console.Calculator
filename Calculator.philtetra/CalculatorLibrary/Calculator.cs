@@ -1,33 +1,60 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Runtime.CompilerServices;
 
 namespace CalculatorLibrary;
 public partial class Calculator
 {
 	public int UseCount { get; private set; }
-	// private readonly JsonWriter writer;
-	private const string binPath = ".\\bin\\Debug\\net8.0";
-	private const string userInfoFile = $"{binPath}\\user_info.json";
-	private const string calculationsFile = $"{binPath}\\calculations_log.json";
-	private const string calculationsTypesFile = $"{binPath}\\calculations_types.json";
+	private const string userInfoFile = "user_info.json";
+	private const string calculationsFile = "calculations_log.json";
+	private const string calculationsTypesFile = $"calculations_types.json";
 	public List<Operation> Calculations { get; set; }
 	private List<int> calculationsTypesEncoded;
+
+	public readonly Dictionary<int, Func<double, double, double>> IntToDoOperationMap;
+	public readonly Dictionary<int, Func<double, double, Operation>> IntToGetOperationMap;
+
 	public Calculator()
 	{
 		Calculations = new List<Operation>();
-		// StreamWriter logFile = File.CreateText("calculations_log.json");
-		// Trace.AutoFlush = true;
-		// writer = new JsonTextWriter(logFile);
-		// writer.Formatting = Formatting.Indented;
-		// writer.WriteStartObject();
-		// writer.WritePropertyName("Operations");
-		// writer.WriteStartArray();
+		calculationsTypesEncoded = new List<int>();
+
+		this.IntToDoOperationMap = new()
+		{
+			[0] = DoOperation<Addition>,
+			[1] = DoOperation<Subtraction>,
+			[2] = DoOperation<Multiplication>,
+			[3] = DoOperation<Division>,
+			[4] = DoOperation<Modulus>,
+			[5] = DoOperation<Power>,
+			[6] = DoOperation<SquareRoot>,
+			[7] = DoOperation<Sinus>,
+			[8] = DoOperation<Cosinus>,
+			[9] = DoOperation<Tangent>
+		};
+
+		this.IntToGetOperationMap = new()
+		{
+			[0] = GetOperation<Addition>,
+			[1] = GetOperation<Subtraction>,
+			[2] = GetOperation<Multiplication>,
+			[3] = GetOperation<Division>,
+			[4] = GetOperation<Modulus>,
+			[5] = GetOperation<Power>,
+			[6] = GetOperation<SquareRoot>,
+			[7] = GetOperation<Sinus>,
+			[8] = GetOperation<Cosinus>,
+			[9] = GetOperation<Tangent>
+		};
+
+		LoadCalculations();
 	}
 	public double DoOperation<T>(double num1, double num2) where T : Operation, new()
 	{
 		T operation = new() { Num1 = num1, Num2 = num2 };
-		// SaveOperation(operation); // TO FIX: currently throwing an exception
 		this.Calculations.Add(operation);
+		this.calculationsTypesEncoded.Add(TypeToIntMap[operation.GetType()]);
 		IncrementUseCount();
 
 		return operation.Result;
@@ -36,7 +63,6 @@ public partial class Calculator
 	public T GetOperation<T>(double num1, double num2) where T : Operation, new()
 	{
 		T operation = new() { Num1 = num1, Num2 = num2 };
-		//SaveOperation(operation); // TO FIX: currently throwing an exception
 		this.Calculations.Add(operation);
 		this.calculationsTypesEncoded.Add(TypeToIntMap[operation.GetType()]);
 		IncrementUseCount();
@@ -44,36 +70,17 @@ public partial class Calculator
 		return operation;
 	}
 
-	// private void SaveOperation(Operation op)
-	// {
-	// 	writer.WriteStartObject();
-	// 	writer.WritePropertyName("Operand1");
-	// 	writer.WriteValue(op.Num1);
-	// 	writer.WritePropertyName("Operand2");
-	// 	writer.WriteValue(op.Num2);
-	// 	writer.WritePropertyName("Operation");
-	// 	writer.WriteValue(op.GetType());
-	// 	writer.WritePropertyName("Result");
-	// 	writer.WriteValue(op.Result);
-	// 	writer.WriteEndObject();
-	// }
-
-	// public void Finish()
-	// {
-	// 	writer.WriteEndArray();
-	// 	writer.WriteEndObject();
-	// 	writer.Close();
-	// }
-
 	private void IncrementUseCount() => this.UseCount++;
 
-	public void LoadUserInfo()
+	[Obsolete($"LoadUserInfo is deprecated, {nameof(this.UseCount)} now gets set while loading {nameof(this.Calculations)} list")]
+	private void LoadUserInfo()
 	{
 		if (!File.Exists(userInfoFile)) return;
 		UserInfoAction((_, uses) => this.UseCount = uses);
 	}
 
-	public void SaveUserInfo()
+	[Obsolete($"SaveUserInfo is deprecated, as {nameof(this.UseCount)} equals to the {nameof(this.Calculations)}.Count")]
+	private void SaveUserInfo()
 	{
 		string file = userInfoFile;
 		string propertyName = nameof(this.UseCount);
@@ -133,42 +140,47 @@ public partial class Calculator
 
 	public void LoadCalculations()
 	{
-		string file = calculationsFile;
-		string typesFile = calculationsTypesFile;
+		if (!File.Exists(calculationsFile))
 
-		if (!File.Exists(file))
 		{
-			Console.WriteLine($"'{file}' file is not present.");
+			Console.WriteLine($"'{calculationsFile}' file is missing.");
 			return;
 		}
 
 		if (!File.Exists(calculationsTypesFile))
 		{
-			Console.WriteLine($"Types cannot be determined as "
-			+ "'{calculationsTypesFile}' file is missing or is corrupted.");
+			Console.WriteLine("Types cannot be determined, as "
+			+ $"'{calculationsTypesFile}' file is missing or is corrupted.");
 			return;
 		}
 
 		try
 		{
-			JArray typeArr = JArray.Parse(File.ReadAllText(typesFile));
-			List<int>? types = JsonConvert.DeserializeObject<List<int>>(typeArr.ToString());
-			for (int i = 0; i < types?.Count; i++)
+			JArray encodedTypesJArr = JArray.Parse(File.ReadAllText(calculationsTypesFile));
+			int[]? encodedTypes = JsonConvert.DeserializeObject<int[]>(encodedTypesJArr.ToString());
+
+			if (encodedTypes is null)
 			{
-				// JObject calculation = JObject.Parse()
+				Console.WriteLine($"{nameof(encodedTypes)} is null");
+				return;
 			}
 
-			JArray jsonArr = JArray.Parse(File.ReadAllText(file));
-			List<Operation>? calculations = JsonConvert.DeserializeObject<List<Operation>>(jsonArr.ToString());
+			JArray intermediatesJArr = JArray.Parse(File.ReadAllText(calculationsFile));
+			List<Addition>? intermediates = JsonConvert.DeserializeObject<List<Addition>>(intermediatesJArr.ToString());
 
-			if (calculations is not null)
+			if (intermediates is null)
 			{
-				this.Calculations = calculations;
+				Console.WriteLine($"{nameof(intermediates)} is null");
+				return;
+			}
+			else
+			{
+				SetCalculations(intermediates, encodedTypes);
 			}
 		}
 		catch (JsonReaderException ex)
 		{
-			Console.WriteLine($"Parsing file '{file}' failed:\n{ex.Message}\nStack Trace:\n{ex.StackTrace}");
+			Console.WriteLine($"Parsing file '{calculationsFile}' failed:\n{ex.Message}\nStack Trace:\n{ex.StackTrace}");
 		}
 		catch (Exception ex)
 		{
@@ -178,19 +190,49 @@ public partial class Calculator
 
 	public void SaveCalculations()
 	{
-		string file = calculationsFile;
-		string typesFile = calculationsTypesFile;
-
 		try
 		{
-			string json = JsonConvert.SerializeObject(this.Calculations, Formatting.Indented);
-			string types = JsonConvert.SerializeObject(this.calculationsTypesEncoded, Formatting.Indented);
-			File.WriteAllText(file, json);
-			File.WriteAllText(typesFile, types);
+			string json = JsonConvert.SerializeObject(GetIntermediateCalculations<Addition>(), Formatting.Indented);
+			string types = JsonConvert.SerializeObject(GetEncodedCalculationsTypes(), Formatting.Indented);
+			File.WriteAllText(calculationsFile, json);
+			File.WriteAllText(calculationsTypesFile, types);
 		}
 		catch (Exception ex)
 		{
 			Console.WriteLine($"{ex.Message}\nInner - {ex.InnerException}: {ex.InnerException?.Message}");
+		}
+	}
+
+	private List<T> GetIntermediateCalculations<T>() where T : Operation, new()
+	{
+		List<T> intermediates = new List<T>();
+		foreach (Operation op in this.Calculations)
+		{
+			intermediates.Add(new T() { Num1 = op.Num1, Num2 = op.Num2 });
+		}
+		return intermediates;
+	}
+
+	private int[] GetEncodedCalculationsTypes()
+	{
+		int[] encodedTypes = new int[this.Calculations.Count];
+		for (int i = 0; i < encodedTypes.Length; i++)
+		{
+			encodedTypes[i] = TypeToIntMap[this.Calculations[i].GetType()];
+		}
+		return encodedTypes;
+	}
+
+	private void SetCalculations<T>(IReadOnlyList<T> operations, IReadOnlyList<int> typesEncoded) where T : Operation, new()
+	{
+		if (operations.Count != typesEncoded.Count)
+		{
+			throw new ArgumentException("Length of operations and calculationsTypesEncoded array parameters must be equal.");
+		}
+
+		for (int i = 0; i < operations.Count; i++)
+		{
+			this.IntToDoOperationMap[typesEncoded[i]](operations[i].Num1, operations[i].Num2);
 		}
 	}
 
@@ -221,6 +263,4 @@ public partial class Calculator
 		[typeof(Cosinus)] = 8,
 		[typeof(Tangent)] = 9
 	};
-
-
 }

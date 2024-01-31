@@ -1,7 +1,7 @@
 ﻿namespace CalculatorProgram;
 class Program
 {
-	static void Main(string[] args)
+	private static void Main(string[] args)
 	{
 		//OperationHelper.Num1Color = ConsoleColor.Cyan;
 		//OperationHelper.Num2Color = ConsoleColor.Magenta;
@@ -15,9 +15,6 @@ class Program
 			PrintHeader(false);
 			endApp = menu.View();
 		}
-
-		// Add call to close the JSON writer before return
-		menu.SaveData();
 	}
 
 	static void PrintHeader(bool displayConsoleInfo)
